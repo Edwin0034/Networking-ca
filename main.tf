@@ -14,7 +14,7 @@ resource "aws_key_pair" "generated_key" {
 #comment
 resource "local_file" "private_key_file" {
   content              = tls_private_key.ssh_key.private_key_pem
-  filename             = "${path.module}/ca1-key.pem"
+  filename             = "${path.module}/key.pem"
   file_permission      = "0400"
   directory_permission = "0700"
 }
