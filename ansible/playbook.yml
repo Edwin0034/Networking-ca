@@ -1,0 +1,52 @@
+- name: Deploy Docker App 
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+          - ca-certificates
+          - curl
+          - gnupg
+          - python3-pip
+
+    - name: Install Docker
+      shell: apt install docker.io -y 
+      become: true
+
+    - name: Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create app directory
+      file:
+        path: /home/ubuntu/testapp
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy application files
+      copy:
+        src: ../webapp/
+        dest: /home/ubuntu/testapp/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Build Docker 
+      command: docker build -t testapp /home/ubuntu/testapp
+      args:
+        chdir: /home/ubuntu/testapp
+
+    - name: Run Docker container
+      command: docker run -d --name testapp -p 80:80 testapp
